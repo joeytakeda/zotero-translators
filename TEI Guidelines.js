@@ -101,6 +101,7 @@ function parseMetadata(item, doc, url) {
 		creatorType: "editor",
 		fieldMode: 1,
 	});
+	item.url = url;
 	item.attachments.push({
 		title: "Snapshot",
 		document: doc
