@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-05-11 20:12:51"
+	"lastUpdated": "2024-05-12 00:31:25"
 }
 
 /*
@@ -54,28 +54,42 @@ async function doWeb(doc, url) {
 	if (type == "book") {
 		item.title = GL_TITLE;
 	}
-	
 	if (type == "bookSection") {
 		item.title = text(doc, '.main-content > h2') || text(doc, '.main-content h3.oddSpec');
 		item.bookTitle = GL_TITLE;
 	}
-	
 	await item.complete();
 	return item;
 }
 
+/**
+ * Parses metadata from a TEI Guidelines page and
+ * sets properties in the Zotero item. Most properties
+ * have been inferred from the TEI-C's recommendations
+ * for licensing and citation:
+ * https://tei-c.org/guidelines/licensing-and-citation/
+ *
+ * @param {Z.Item} item The Zotero item
+ * @param {*} doc The HTML document
+ * @param {*} url The URL for the item
+ * @returns The (not yet complete) item with metadata
+ */
 function parseMetadata(item, doc, url) {
 	const footer = doc.querySelector('.stdfooter');
 	// Version info is linked but not readily identifiable,
 	// so we need to find it
-	const versionLink = [...footer.querySelectorAll('address a')].find((a) => {
-		return /^(\d+\.\d+\.\d+)$/gi.test(ZU.trim(a.innerText));
-	});
+	const versionLink = [...footer.querySelectorAll('address a')]
+						.find((a) => {
+							return /^(\d+\.\d+\.\d+)$/gi.test(ZU.trim(a.innerText));
+						});
 	const version = ZU.trim(versionLink.innerText);
 	// Convert date format
-	const date = ZU.strToISO(text(footer, "address > span.date").replace(/(\d)(th|nd|st)\s/gi, "$1 "));
+	const date = ZU.strToISO(text(footer, "address > span.date")
+					.replace(/(\d)(th|nd|st)\s/gi, "$1 "));
 	// The declared root lang is unreliable; we need to use the meta
-	const language = attr(doc, "meta[name='DC.Language']", "content").split(/\s+/).pop();
+	const language = attr(doc, "meta[name='DC.Language']", "content")
+					.split(/\s+/)
+					.pop();
 
 	item.publisher = "TEI Consortium";
 	item.date = date;
@@ -103,23 +117,6 @@ function parseMetadata(item, doc, url) {
 	}
 	return item;
 }
-
-
-// // The entire guidelines is a book
-// function parseFull(doc, url = doc.location.href) {
-// 	item.title = "TEI P5: Guidelines for Electronic Text Encoding and Interchange";
-// 	item.complete();
-// }
-
-// // Consider each section a "Chapter" of a book
-// function parseChapter(doc, url = doc.location.href) {
-// 	const metadata = createMetadata(doc, url);
-// 	const item = Object.assign(new Z.Item("bookSection"), metadata);
-// 	Z.debug(item);
-	
-	
-// 	item.complete();
-// }
 
 /**
  * Create all metadata for the Guidelines, which can be
@@ -271,6 +268,37 @@ var testCases = [
 						"title": "TEI Guidelines version 4.7.0 (Vault)",
 						"mimeType": "text/html",
 						"snapshot": false
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://tei-c.org/Vault/P5/3.3.0/doc/tei-p5-doc/en/html/ref-macro.anyXML.html",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "macro.anyXML",
+				"creators": [
+					{
+						"lastName": "TEI Consortium",
+						"creatorType": "editor",
+						"fieldMode": 1
+					}
+				],
+				"date": "2018-01-31",
+				"bookTitle": "TEI P5: Guidelines for Electronic Text Encoding and Interchange",
+				"edition": "3.3.0",
+				"libraryCatalog": "TEI Guidelines",
+				"publisher": "TEI Consortium",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
